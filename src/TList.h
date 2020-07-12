@@ -1,5 +1,5 @@
 ﻿//=========================================================================================
-// TTinyList.h 
+// TList.h 
 // 定义一个双向List类
 // 优点：插入和删除节点不需要进行内存的分配和释放，节点操作速度极快
 //		 节点可以自删除，不需要知道所处的链
@@ -7,8 +7,8 @@
 // 柯达昭
 // 2008-02-27
 //=========================================================================================
-#ifndef __TLIST_H__
-#define __TLIST_H__
+#ifndef __XMEMORY_TLIST_H__
+#define __XMEMORY_TLIST_H__
 #include <assert.h>
 
 namespace XMemory
@@ -21,18 +21,18 @@ namespace XMemory
 		TList( const TList& );
 	public:
 		typedef ImpClass CNode;
-		class CGammaListNode
+		class CListNode
 		{
-			CGammaListNode*	m_pPreNode;
-			CGammaListNode*	m_pNextNode;
+			CListNode*	m_pPreNode;
+			CListNode*	m_pNextNode;
 			friend class TList<CNode>;
 
 		public:
-			CGammaListNode() : m_pPreNode(nullptr), m_pNextNode(nullptr)
+			CListNode() : m_pPreNode(nullptr), m_pNextNode(nullptr)
 			{
 			}
 
-			~CGammaListNode()
+			~CListNode()
 			{ 
 				Remove();
 			}
@@ -62,10 +62,10 @@ namespace XMemory
 				return m_pNextNode && m_pNextNode->m_pNextNode ? static_cast<CNode*>( m_pNextNode ) : nullptr;
 			}
 
-			void InsertBefore( CGammaListNode& Node )
+			void InsertBefore( CListNode& Node )
 			{
-				GammaAst( !Node.IsInList() );
-				GammaAst( &Node != this );
+				assert( !Node.IsInList() );
+				assert( &Node != this );
 
 				Node.m_pPreNode  = m_pPreNode;
 				Node.m_pNextNode = this;
@@ -73,10 +73,10 @@ namespace XMemory
 				m_pPreNode = &Node;
 			}
 
-			void InsertAfter( CGammaListNode& Node )
+			void InsertAfter( CListNode& Node )
 			{
-				GammaAst( !Node.IsInList() );
-				GammaAst( &Node != this );
+				assert( !Node.IsInList() );
+				assert( &Node != this );
 
 				Node.m_pNextNode  = m_pNextNode;
 				Node.m_pPreNode = this;
@@ -124,17 +124,17 @@ namespace XMemory
 			return m_NodeHead.m_pNextNode == &m_NodeTail;
 		}
 
-		void PushFront( CGammaListNode& Node )
+		void PushFront( CListNode& Node )
 		{
 			InsertAfter( Node, nullptr );
 		}
 
-		void PushBack( CGammaListNode& Node )
+		void PushBack( CListNode& Node )
 		{
 			InsertBefore( Node, nullptr );
 		}
 
-		void InsertBefore( CGammaListNode& Node, CGammaListNode* pNodePos )
+		void InsertBefore( CListNode& Node, CListNode* pNodePos )
 		{
 			assert( !Node.IsInList() );
 			assert( &Node != pNodePos );
@@ -146,7 +146,7 @@ namespace XMemory
 			pNodePos->m_pPreNode = &Node;
 		}
 
-		void InsertAfter( CGammaListNode& Node, CGammaListNode* pNodePos )
+		void InsertAfter( CListNode& Node, CListNode* pNodePos )
 		{
 			assert( !Node.IsInList() );
 			assert( &Node != pNodePos );
@@ -188,13 +188,13 @@ namespace XMemory
 			return iterator();
 		}
 	private:
-		CGammaListNode	m_NodeHead;
-		CGammaListNode	m_NodeTail;
+		CListNode	m_NodeHead;
+		CListNode	m_NodeTail;
 	};
 
 	template<typename DataType>
 	class TGammaListNode : 
-		public TList< TGammaListNode<DataType> >::CGammaListNode
+		public TList< TGammaListNode<DataType> >::CListNode
 	{
 		DataType m_Data;
 	public:

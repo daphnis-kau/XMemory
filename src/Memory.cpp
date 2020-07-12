@@ -130,13 +130,13 @@ namespace XMemory
 	//--------------------------------------------------------------------------
 	// 非操作系统相关
 	//--------------------------------------------------------------------------
-	void* GammaAlloc( size_t nSize, void* pCallAddress )
+	void* Alloc( size_t nSize, void* pCallAddress )
 	{
 		pCallAddress = pCallAddress ? pCallAddress : ( (void**)&nSize )[-1];
 		return CMemoryMgr::Instance().Allocate( nSize, pCallAddress );
 	}
 
-	void GammaFree( void * p )
+	void Free( void * p )
 	{
 		CMemoryMgr::Instance().Free( p );
 	}

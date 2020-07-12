@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Misc.h"
 #include "TList.h"
 #include "Memory.h"
 #include "LockHelp.h"
@@ -17,45 +18,55 @@
 
 namespace XMemory
 {
-
-#if( defined __linux__ )
-	enum EMemoryConst { eMemoryConst_Unit = 16 };
-	static const uint32_t s_aryClassSize[] =
-	{ 
-		16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240, 256,
-		272, 288, 304, 320, 336, 352, 368, 384, 400, 416, 432, 448, 464, 480, 496, 
-		512, 528, 544, 560, 576, 592, 608, 624, 640, 656, 672, 688, 704, 720, 736, 
-		752, 768, 784, 800, 816, 832, 848, 864, 880, 896, 912, 928, 944, 960, 976, 
-		992, 1008, 1024, 1040, 1056, 1072, 1088, 1104, 1120, 1136, 1168, 1184, 1200, 
-		1232, 1248, 1280, 1296, 1328, 1360, 1392, 1424, 1456, 1488, 1520, 1552, 1584, 
-		1632, 1680, 1712, 1760, 1808, 1872, 1920, 1984, 2048, 2112, 2176, 2256, 2336, 
-		2416, 2512, 2608, 2720, 2848, 2976, 3120, 3264, 3440, 3632, 3840, 4096, 4368, 
-		4672, 5040, 5456, 5952, 6544, 7280, 8192, 9360, 10912, 13104, 16384
-	};
-#else
-	enum EMemoryConst { eMemoryConst_Unit = 8 };
-	static const uint32_t s_aryClassSize[] =
+	// 通过模板计算分配器类型数量
+	template<int32_t UnitStep, int32_t PageSize, int32_t MaxUnitSize>
+	struct TMemoryUnitInfo
 	{
-		8,    16,    24,    32,   40,   48,   56,   64,   72, 80,
-		88,   96,   104,   112,  120,  128,  136,  144,  152, 160,
-		168,  176,  184,   192,  200,  208,  216,  224,  232, 240,
-		248,  256,  264,   272,  280,  288,  296,  304,  312, 320,
-		328,  336,  344,   352,  360,  368,  376,  384,  392, 400,
-		408,  416,  424,   432,  440,  448,  456,  464,  472, 480,
-		488,  496,  504,   512,  520,  528,  536,  544,  552, 560,
-		568,  576,  584,   592,  600,  608,  616,  624,  632, 640,
-		648,  656,  664,   672,  680,  688,  696,  704,  712, 720,
-		728,  736,  744,   752,  760,  768,  776,  784,  792, 808,
-		816,  824,  840,   848,  856,  872,  880,  896,  904, 920,
-		936,  944,  960,   976,  992, 1008, 1024, 1040, 1056, 1072,
-		1088, 1104, 1128, 1144, 1168, 1184, 1208, 1232, 1256, 1280,
-		1304, 1336, 1360, 1392, 1424, 1456, 1488, 1520, 1560, 1592,
-		1632, 1680, 1720, 1768, 1816, 1872, 1920, 1984, 2048, 2112,
-		2184, 2256, 2336, 2424, 2520, 2616, 2728, 2848, 2976, 3120,
-		3272, 3448, 3640, 3848, 4096, 4368, 4680, 5040, 5456, 5952,
-		6552, 7280, 8192, 9360, 10920, 13104, 16384,
+		template<int32_t UnitSize>
+		struct GetIndexSize
+		{
+			enum
+			{
+				eUnitCount = PageSize/UnitSize,
+				eNextMinCount = eUnitCount + 1,
+				eNextCountBySize = PageSize/( UnitSize - UnitStep),
+				eNextUnitCount = TMax<eNextMinCount, eNextCountBySize>::eValue,
+				eNextUnitRawSize = PageSize/eNextUnitCount,
+				eNextUnitSize = TAligenDown<eNextUnitRawSize, UnitStep>::eValue,
+				eUnitIndex = GetIndexSize<eNextUnitSize>::eUnitIndex + 1
+			};
+
+			static void BuildClassSize( uint32_t aryClassSize[] ) 
+			{
+				GetIndexSize<eNextUnitSize>::BuildClassSize( aryClassSize );
+				aryClassSize[eUnitIndex] = UnitSize;
+			}
+		};
+
+		template<>
+		struct GetIndexSize<UnitStep>
+		{
+			enum
+			{
+				eUnitCount = PageSize/UnitStep,
+				eUnitIndex = 0
+			};
+
+			static void BuildClassSize( uint32_t aryClassSize[] )
+			{
+				aryClassSize[eUnitIndex] = UnitStep;
+			}
+		};
+
+		enum 
+		{ 
+			eUnitStep = UnitStep,
+			eUnitClassCount = GetIndexSize<MaxUnitSize>::eUnitIndex + 1
+		};
+		uint32_t m_aryClassSize[eUnitClassCount];
+
+		TMemoryUnitInfo() { GetIndexSize<MaxUnitSize>::BuildClassSize( m_aryClassSize ); }
 	};
-#endif
 
 	class CMemoryBlock;
 
@@ -68,8 +79,7 @@ namespace XMemory
 		{
 			eMemoryConst_PageSize = 64 * 1024,
 			eMemoryConst_MaxSize = 16384,											// 最大管理内存大小，超过该值则不进行管理
-			eMemoryConst_IndexCount = eMemoryConst_MaxSize / eMemoryConst_Unit,		// 索引数量
-			eMemoryConst_AllocateCount = sizeof(s_aryClassSize)/sizeof(uint32_t),	// 分配器个数
+			eMemoryConst_Unit = sizeof( void* )*2
 		};
 
 		enum
@@ -91,9 +101,9 @@ namespace XMemory
 			union
 			{
 				SMgrMemHead	m_MgrHead;
-				uint32_t		m_nBlockSize;
+				uint32_t	m_nBlockSize;
 #ifdef _IOS
-				uint64_t		m_nPackHead;
+				uint64_t	m_nPackHead;
 #elif( defined __linux__ )
 				void*		m_pPackHead[2];
 #else
@@ -104,6 +114,17 @@ namespace XMemory
 #ifdef MEMORY_LEASK
 			SAllocInfo*		m_pAllocInfo;
 #endif
+		};
+
+		typedef 
+			TMemoryUnitInfo
+			<eMemoryConst_Unit, eMemoryConst_PageSize, eMemoryConst_MaxSize> 
+			SMemoryUnitInfo;
+
+		enum 
+		{
+			eMemoryConst_IndexCount = eMemoryConst_MaxSize / SMemoryUnitInfo::eUnitStep,	// 索引数量
+			eMemoryConst_AllocateCount = SMemoryUnitInfo::eUnitClassCount,					// 分配器个数
 		};
 
 	public:
@@ -134,6 +155,7 @@ namespace XMemory
 
 	//////////////////////////////////////////////////////////////////////////
 	private:
+		SMemoryUnitInfo		m_MemoryUnitInfo;
 
 		bool				m_bEnable;
 		uint8_t				m_aryClassIndex[eMemoryConst_IndexCount];

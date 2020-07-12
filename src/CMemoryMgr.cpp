@@ -27,7 +27,7 @@ extern "C"
 namespace XMemory	
 {
 #ifdef CHECK_MEMORY_BOUND
-	class CMemoryBlock : public TList<CMemoryBlock>::CGammaListNode
+	class CMemoryBlock : public TList<CMemoryBlock>::CListNode
 	{ public: size_t m_nBlockSize; };
 #else
 	class CMemoryBlock { public: size_t m_nBlockSize; };
@@ -136,13 +136,13 @@ namespace XMemory
 #endif
 		for( uint32_t i = 0, n = 1; i < eMemoryConst_AllocateCount; i++ )
 		{
-			while( n*eMemoryConst_Unit <= s_aryClassSize[i] )
+			while( n*eMemoryConst_Unit <= m_MemoryUnitInfo.m_aryClassSize[i] )
 			{
 				uint32_t nSize = n++ * eMemoryConst_Unit;
 				m_aryClassIndex[( nSize - 1 ) / eMemoryConst_Unit] = (uint8_t)i;
 			}
 		}
-
+		
 		memset( m_aryMemFreeList, 0, sizeof(m_aryMemFreeList) );
 		memset( m_nFixManageSize, 0, sizeof(m_nFixManageSize) );
 		memset( m_nFixAllocSize, 0, sizeof(m_nFixAllocSize) );
@@ -204,7 +204,7 @@ namespace XMemory
 		else 
 		{
 			uint8_t nIdx = m_aryClassIndex[ ( ( nSize - 1 )/eMemoryConst_Unit) ];
-			nSize = s_aryClassSize[ nIdx ];
+			nSize = m_MemoryUnitInfo.m_aryClassSize[ nIdx ];
 
 			if ( !m_bEnable )
 				return NULL;
@@ -229,7 +229,7 @@ namespace XMemory
 
 			assert( nNeedSize + sizeof(SMemHead) <= nSize );
 			size_t nEmptySize = nSize - ( sizeof(SMemHead) + nNeedSize );
-			size_t nPreClassSize = nIdx ? s_aryClassSize[nIdx - 1] : 0;
+			size_t nPreClassSize = nIdx ? m_MemoryUnitInfo.m_aryClassSize[nIdx - 1] : 0;
 			size_t nMaxEmptySize = nSize - nPreClassSize;
 			assert( nEmptySize <= nMaxEmptySize );
 
@@ -292,8 +292,8 @@ namespace XMemory
 				throw( "Free Invalid Memory!!!!" );
 
 			uint8_t nIdx = pMemAlloc->m_MgrHead.m_nIndex;
-			nSize = s_aryClassSize[nIdx];
-			size_t nPreClassSize = nIdx ? s_aryClassSize[nIdx - 1] : 0;
+			nSize = m_MemoryUnitInfo.m_aryClassSize[nIdx];
+			size_t nPreClassSize = nIdx ? m_MemoryUnitInfo.m_aryClassSize[nIdx - 1] : 0;
 			size_t nMaxEmptySize = nSize - nPreClassSize;
 			if( pMemAlloc->m_MgrHead.m_nEmpty > nMaxEmptySize )
 				throw( "Free Invalid Memory!!!!" );
