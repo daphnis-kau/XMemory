@@ -1,0 +1,8 @@
+if(WIN32)
+  set_property(GLOBAL PROPERTY USE_FOLDERS On)
+  set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "_Predefined")
+endif(WIN32)
+cmake_minimum_required(VERSION 2.6)
+project(XMemory) 
+add_subdirectory(src) 
+add_subdirectory(sampler) 
