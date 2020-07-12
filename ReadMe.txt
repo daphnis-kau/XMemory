@@ -4,7 +4,7 @@
 #define CHECK_MEMORY_ERROR
 #define CHECK_MEMORY_BOUND
 
-This is a library for memory management, can effectively find memory leaks and memory overruns, and can largely avoid memory fragmentation.
+This is a library for memory management, can effectively locate memory leaks and memory out of bounds, and can largely avoid memory fragmentation.
 To avoid performance problems, comment out the following three macros in the CMemoryMgr.h when you do not need to locate memory leaks and out of bounds.
 #define MEMORY_LEASK
 #define CHECK_MEMORY_ERROR
