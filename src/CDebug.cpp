@@ -181,7 +181,7 @@ namespace XMemory
 				return i - nBegin;
 			pStack[ i - nBegin ] = pTempStack[i];
 		}
-		return Min<size_t>( 2048, nEnd ) - nBegin;
+		return ( nEnd < 2048 ? nEnd : 2048 ) - nBegin;
 	#else
 		if( m_unwind_backtrace == NULL )
 			return 0;
