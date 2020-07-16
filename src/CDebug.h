@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Misc.h"
 #include "LockHelp.h"
 
 #ifndef _WIN32

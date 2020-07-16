@@ -88,6 +88,25 @@ namespace XMemory
 
 		return true;
 	}
+
+	template<typename _Type>
+	uint32_t strcpy_safe( _Type* pDes, const _Type* pSrc, uint32_t nSize )
+	{
+		if( !nSize )
+			return 0;
+		if( !pSrc )
+		{
+			pDes[0] = 0;
+			return 0;
+		}
+
+		uint32_t i = 0;
+		--nSize;
+		while( i < nSize && *pSrc )
+			pDes[i++] = *pSrc++;
+		pDes[i] = 0;
+		return i;
+	}
 }
 
 #endif

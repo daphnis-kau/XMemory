@@ -109,18 +109,12 @@ namespace XMemory
 				return;
 		}
 
-		for( size_t i = 0; i < nSize; i++ )
-		{
-			szSymbolBuf[i] = pInfo->Name[i];
-			if(szSymbolBuf[i])
-				continue;
-			break;
-		}
+		strcpy_safe( szSymbolBuf, pInfo->Name, nSize );
 #else
 #ifndef _ANDROID
 		char** arySymbol;
 		arySymbol = backtrace_symbols( &pAddress, 1 );
-		strcpy_safe( szSymbolBuf, *arySymbol, nSize, INVALID_32BITID );
+		strcpy_safe( szSymbolBuf, *arySymbol, nSize );
 		free( arySymbol );
 #else
 		if( m_get_backtrace_symbols == NULL || m_free_backtrace_symbols == NULL )
@@ -129,7 +123,7 @@ namespace XMemory
 		backtrace_frame_t frame = { (uintptr_t)pAddress, 0, 0 };
 		m_get_backtrace_symbols( &frame, 1, &symbols );
 		const char* symbolName = symbols.demangled_name ? symbols.demangled_name : symbols.symbol_name;  
-		strcpy_safe( szSymbolBuf, symbolName, nSize, INVALID_32BITID );
+		strcpy_safe( szSymbolBuf, symbolName, nSize );
 		m_free_backtrace_symbols( &symbols, 1 ); 
 #endif
 #endif
