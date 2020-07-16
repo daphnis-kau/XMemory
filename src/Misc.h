@@ -7,6 +7,8 @@
 #ifndef __XMEMORY_MISC_H__
 #define __XMEMORY_MISC_H__
 
+#include <stdint.h>
+
 namespace XMemory
 {
 	template<class IntType>

@@ -22,6 +22,7 @@
 
 #include <sstream>
 #include <stdlib.h>
+#include <stdint.h>
 
 using namespace std;
 
