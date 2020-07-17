@@ -99,9 +99,9 @@ namespace XMemory
 			bool operator == ( const iterator& rhs ) const { return m_pNode == rhs.m_pNode; }
 			bool operator != ( CNode* pNode ) const { return m_pNode != pNode; }
 			bool operator != ( const iterator& rhs ) const { return m_pNode != rhs.m_pNode; }
-			iterator& operator++() { m_pNode = m_pNode ? m_pNode->CGammaListNode::GetNext() : nullptr; return *this; }
+			iterator& operator++() { m_pNode = m_pNode ? m_pNode->CNode::GetNext() : nullptr; return *this; }
 			iterator operator++( int ) { iterator i = *this; ++*this; return i; }
-			iterator& operator--() { m_pNode = m_pNode ? m_pNode->CGammaListNode::GetPre() : nullptr; return *this; }
+			iterator& operator--() { m_pNode = m_pNode ? m_pNode->CNode::GetPre() : nullptr; return *this; }
 			iterator operator--( int ) { iterator i = *this; ++*this; return i; }
 			CNode& operator* () const { return *m_pNode; }
 		};
