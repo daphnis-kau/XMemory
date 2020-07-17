@@ -8,6 +8,7 @@
 #define __XMEMORY_MISC_H__
 
 #include <stdint.h>
+#include <stdlib.h>
 
 namespace XMemory
 {
