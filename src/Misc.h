@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <memory.h>
 
 namespace XMemory
 {
