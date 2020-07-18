@@ -3,6 +3,7 @@
 #include "TList.h"
 #include "Memory.h"
 #include "LockHelp.h"
+#include "MemoryUnit.h"
 
 //linux下和v8不兼容，暂时屏蔽
 #define ENABLE_MEMORY_MGR
@@ -18,56 +19,6 @@
 
 namespace XMemory
 {
-	// 通过模板计算分配器类型数量
-	template<int32_t UnitStep, int32_t PageSize, int32_t MaxUnitSize>
-	struct TMemoryUnitInfo
-	{
-		template<int32_t UnitSize>
-		struct GetIndexSize
-		{
-			enum
-			{
-				eUnitCount = PageSize/UnitSize,
-				eNextMinCount = eUnitCount + 1,
-				eNextCountBySize = PageSize/( UnitSize - UnitStep),
-				eNextUnitCount = TMax<eNextMinCount, eNextCountBySize>::eValue,
-				eNextUnitRawSize = PageSize/eNextUnitCount,
-				eNextUnitSize = TAligenDown<eNextUnitRawSize, UnitStep>::eValue,
-				eUnitIndex = GetIndexSize<eNextUnitSize>::eUnitIndex + 1
-			};
-
-			static void BuildClassSize( uint32_t aryClassSize[] ) 
-			{
-				GetIndexSize<eNextUnitSize>::BuildClassSize( aryClassSize );
-				aryClassSize[eUnitIndex] = UnitSize;
-			}
-		};
-
-		template<>
-		struct GetIndexSize<UnitStep>
-		{
-			enum
-			{
-				eUnitCount = PageSize/UnitStep,
-				eUnitIndex = 0
-			};
-
-			static void BuildClassSize( uint32_t aryClassSize[] )
-			{
-				aryClassSize[eUnitIndex] = UnitStep;
-			}
-		};
-
-		enum 
-		{ 
-			eUnitStep = UnitStep,
-			eUnitClassCount = GetIndexSize<MaxUnitSize>::eUnitIndex + 1
-		};
-		uint32_t m_aryClassSize[eUnitClassCount];
-
-		TMemoryUnitInfo() { GetIndexSize<MaxUnitSize>::BuildClassSize( m_aryClassSize ); }
-	};
-
 	class CMemoryBlock;
 
 	class CMemoryMgr 
@@ -77,9 +28,9 @@ namespace XMemory
 	{
 		enum
 		{
-			eMemoryConst_PageSize = 64 * 1024,
-			eMemoryConst_MaxSize = 16384,											// 最大管理内存大小，超过该值则不进行管理
-			eMemoryConst_Unit = sizeof( void* )*2
+			eMemDef_PageSize = 64 * 1024,
+			eMemDef_MaxSize = 16384,											// 最大管理内存大小，超过该值则不进行管理
+			eMemDef_UnitStep = sizeof( void* )*2
 		};
 
 		enum
@@ -118,13 +69,13 @@ namespace XMemory
 
 		typedef 
 			TMemoryUnitInfo
-			<eMemoryConst_Unit, eMemoryConst_PageSize, eMemoryConst_MaxSize> 
+			<eMemDef_PageSize, eMemDef_UnitStep, eMemDef_MaxSize> 
 			SMemoryUnitInfo;
 
 		enum 
 		{
-			eMemoryConst_IndexCount = eMemoryConst_MaxSize / SMemoryUnitInfo::eUnitStep,	// 索引数量
-			eMemoryConst_AllocateCount = SMemoryUnitInfo::eUnitClassCount,					// 分配器个数
+			eMemoryConst_IndexCount = eMemDef_MaxSize / eMemDef_UnitStep,	// 索引数量
+			eMemoryConst_AllocateCount = SMemoryUnitInfo::eUnitClassCount,	// 分配器个数
 		};
 
 	public:

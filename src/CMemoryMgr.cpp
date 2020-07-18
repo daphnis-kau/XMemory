@@ -136,10 +136,10 @@ namespace XMemory
 #endif
 		for( uint32_t i = 0, n = 1; i < eMemoryConst_AllocateCount; i++ )
 		{
-			while( n*eMemoryConst_Unit <= m_MemoryUnitInfo.m_aryClassSize[i] )
+			while( n*eMemDef_UnitStep <= m_MemoryUnitInfo.m_aryClassSize[i] )
 			{
-				uint32_t nSize = n++ * eMemoryConst_Unit;
-				m_aryClassIndex[( nSize - 1 ) / eMemoryConst_Unit] = (uint8_t)i;
+				uint32_t nSize = n++ * eMemDef_UnitStep;
+				m_aryClassIndex[( nSize - 1 ) / eMemDef_UnitStep] = (uint8_t)i;
 			}
 		}
 		
@@ -195,7 +195,7 @@ namespace XMemory
 			return NULL;
 
 		SMemHead* pMemAlloc = NULL;
-		if ( nSize > eMemoryConst_MaxSize )
+		if ( nSize > eMemDef_MaxSize )
 		{
 			pMemAlloc = (SMemHead*)AllocFromSystem( nSize );
 			m_nBigAllocSize += nSize;
@@ -203,7 +203,7 @@ namespace XMemory
 		}
 		else 
 		{
-			uint8_t nIdx = m_aryClassIndex[ ( ( nSize - 1 )/eMemoryConst_Unit) ];
+			uint8_t nIdx = m_aryClassIndex[ ( ( nSize - 1 )/eMemDef_UnitStep) ];
 			nSize = m_MemoryUnitInfo.m_aryClassSize[ nIdx ];
 
 			if ( !m_bEnable )
@@ -213,10 +213,10 @@ namespace XMemory
 
 			if( !pMemAlloc )
 			{
-				char* pBuffer = (char*)AllocFromSystem( eMemoryConst_PageSize );
-				m_nFixManageSize[nIdx] += eMemoryConst_PageSize;
+				char* pBuffer = (char*)AllocFromSystem( eMemDef_PageSize );
+				m_nFixManageSize[nIdx] += eMemDef_PageSize;
 
-				for( size_t i = 0; i < eMemoryConst_PageSize/nSize; i++ )
+				for( size_t i = 0; i < eMemDef_PageSize/nSize; i++ )
 				{
 					pMemAlloc = (SMemHead*)( pBuffer + i*nSize );
 					*(SMemHead**)( pMemAlloc + 1 ) = m_aryMemFreeList[nIdx];

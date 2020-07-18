@@ -14,6 +14,7 @@ set(head_files
 	Misc.h
 	TList.h
 	LockHelp.h
+	MemoryUnit.h
 	CMemoryMgr.h
 	CDebug.h)
 source_group("include" FILES ${head_files})
