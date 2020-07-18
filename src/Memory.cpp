@@ -158,20 +158,9 @@ namespace XMemory
 	
 	void DumpMemoryInfo()
 	{
-		struct _
-		{ 
-			static void Run( void* )
-			{ 
-				CMemoryMgr::Instance().DumpMemoryInfo();
-			}
-		};
-#ifdef _WIN32
-		unsigned ThreadID = 0;
-		_beginthreadex( 0, 0, ( _beginthreadex_proc_type)&_::Run, NULL, 0, &ThreadID );
-#else
-		pthread_t thread;
-		pthread_create( &thread, NULL, (void*(*)(void*))&_::Run, NULL );
-#endif
+		std::thread dumpThread( [](void*)
+		{ CMemoryMgr::Instance().DumpMemoryInfo(); }, nullptr );
+		dumpThread.detach();
 	}
 }
 
