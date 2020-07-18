@@ -84,18 +84,18 @@ namespace XMemory
 
 		return bSuccess;
 #else
-		int32 nProtect = 0;
+		int32_t nProtect = 0;
 		if( nProtectFlag&VIRTUAL_PAGE_READ )
 			nProtect |= PROT_READ;
 		if( nProtectFlag&VIRTUAL_PAGE_WRITE )
 			nProtect |= PROT_WRITE;
 		if( nProtectFlag&VIRTUAL_PAGE_EXECUTE )
 			nProtect |= PROT_EXEC;
-		int32 nFlag = MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS;
+		int32_t nFlag = MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS;
 		void* pResult = mmap( pAddress, nSize, nProtect, nFlag, -1, 0 );
 		if( pResult == pAddress )
 			return true;
-		//int32 nError = errno;
+		//int32_t nError = errno;
 		return false;
 #endif // _WIN32
 	}
@@ -122,7 +122,7 @@ namespace XMemory
 		// could reserve it after we munmap it and even worse if that happened the mmap call would
 		// still work causing both mmap callers to think they mapped the memory.  Mac does have
 		// to release first but it can tell that the following reserve succeeded or not.
-		int32 nFlag = MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS;
+		int32_t nFlag = MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS;
 		return mmap( pAddress, nSize, PROT_NONE, nFlag, -1, 0 ) == pAddress;
 #endif // _WIN32
 	}
